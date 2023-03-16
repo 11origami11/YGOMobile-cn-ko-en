@@ -111,7 +111,9 @@
 /* #undef HAVE___INT64 */
 
 /* Define to the size of a long int type */
+#ifndef SIZEOF_LONG
 #define SIZEOF_LONG 4
+#endif
 
 /* Define to the size of a long long int type */
 #define SIZEOF_LONG_LONG 8

@@ -81,8 +81,6 @@ LOCAL_LDLIBS := -lEGL -llog -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES
 
 LOCAL_STATIC_LIBRARIES := Irrlicht
 LOCAL_STATIC_LIBRARIES += android_native_app_glue
-LOCAL_STATIC_LIBRARIES += libssl_static
-LOCAL_STATIC_LIBRARIES += libcrypto_static
 LOCAL_STATIC_LIBRARIES += libevent2
 LOCAL_STATIC_LIBRARIES += libocgcore_static
 LOCAL_STATIC_LIBRARIES += liblua5.3
@@ -99,7 +97,6 @@ $(call import-add-path,$(LOCAL_PATH)/../Classes)
 $(call import-add-path,$(LOCAL_PATH)/../irrlicht/source)
 $(call import-add-path,$(LOCAL_PATH)/android)
 $(call import-module,Irrlicht/Android/jni)
-$(call import-module,openssl)
 $(call import-module,libevent)
 $(call import-module,sqlite3)
 $(call import-module,ocgcore)
