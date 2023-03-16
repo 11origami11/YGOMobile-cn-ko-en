@@ -6,6 +6,7 @@
 #include "duelclient.h"
 #include "data_manager.h"
 #include "image_manager.h"
+#include "sound_manager.h"
 #include "replay_mode.h"
 #include "single_mode.h"
 #include "materials.h"
@@ -48,7 +49,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_FIRST:
 			case BUTTON_SECOND: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->HideElement(mainGame->wFTSelect);
 				CTOS_TPResult cstr;
 				cstr.res = BUTTON_SECOND - id;
@@ -58,7 +59,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_REPLAY_START: {
 				if(!mainGame->dInfo.isReplay)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->btnReplayStart->setVisible(false);
 				mainGame->btnReplayPause->setVisible(true);
 				mainGame->btnReplayStep->setVisible(false);
@@ -69,7 +70,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_REPLAY_PAUSE: {
 				if(!mainGame->dInfo.isReplay)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->btnReplayStart->setVisible(true);
 				mainGame->btnReplayPause->setVisible(false);
 				mainGame->btnReplayStep->setVisible(true);
@@ -80,19 +81,19 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_REPLAY_STEP: {
 				if(!mainGame->dInfo.isReplay)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				ReplayMode::Pause(false, true);
 				break;
 			}
 			case BUTTON_REPLAY_EXIT: {
 				if(!mainGame->dInfo.isReplay)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				ReplayMode::StopReplay();
 				break;
 			}
 			case BUTTON_REPLAY_SWAP: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				if(mainGame->dInfo.isReplay)
 					ReplayMode::SwapField();
 				else if(mainGame->dInfo.player_type == 7)
@@ -102,28 +103,28 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_REPLAY_UNDO: {
 				if(!mainGame->dInfo.isReplay)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				ReplayMode::Undo();
 				break;
 			}
 			case BUTTON_REPLAY_SAVE: {
 				if(mainGame->ebRSName->getText()[0] == 0)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->actionParam = 1;
 				mainGame->HideElement(mainGame->wReplaySave);
 				mainGame->replaySignal.Set();
 				break;
 			}
 			case BUTTON_REPLAY_CANCEL: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->actionParam = 0;
 				mainGame->HideElement(mainGame->wReplaySave);
 				mainGame->replaySignal.Set();
 				break;
 			}
 			case BUTTON_LEAVE_GAME: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				if(mainGame->dInfo.isSingleMode) {
 					mainGame->singleSignal.SetNoWait(true);
 					SingleMode::StopPlay(false);
@@ -152,18 +153,18 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_SURRENDER_YES: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				DuelClient::SendPacketToServer(CTOS_SURRENDER);
 				mainGame->HideElement(mainGame->wSurrender);
 				break;
 			}
 			case BUTTON_SURRENDER_NO: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->HideElement(mainGame->wSurrender);
 				break;
 			}
 			case BUTTON_SETTINGS: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
 			    if (mainGame->imgSettings->isPressed()) {
                     mainGame->ShowElement(mainGame->wSettings);
                     mainGame->imgSettings->setPressed(true);
@@ -174,13 +175,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			    break;
 			}
 			case BUTTON_CLOSE_SETTINGS: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->HideElement(mainGame->wSettings);
                 mainGame->imgSettings->setPressed(false);
 				break;
 			}
 			case BUTTON_SHOW_LOG: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
                 if (mainGame->imgLog->isPressed()) {
                     mainGame->ShowElement(mainGame->wLogs);
                     mainGame->imgLog->setPressed(true);
@@ -191,13 +192,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CLOSE_LOG: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
                 mainGame->HideElement(mainGame->wLogs);
                 mainGame->imgLog->setPressed(false);
 			    break;
 			}
 			case BUTTON_BGM: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
                 if (mainGame->gameConf.enable_music) {
                     mainGame->gameConf.enable_music = false;
                     mainGame->imgVol->setImage(imageManager.tMute);
@@ -206,11 +207,12 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
                     mainGame->imgVol->setImage(imageManager.tPlay);
                 }
                 mainGame->chkEnableMusic->setChecked(mainGame->gameConf.enable_music);
-                mainGame->soundManager->EnableMusic(mainGame->chkEnableMusic->isChecked());
+				if(!mainGame->chkEnableMusic->isChecked())
+					soundManager.StopBGM();
 				break;
 			}
 			case BUTTON_CHATTING: {
-			    mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+			    soundManager.PlaySoundEffect(SOUND_BUTTON);
 				if (mainGame->gameConf.chkIgnore1) {
 					mainGame->gameConf.chkIgnore1 = false;
 					mainGame->imgChat->setImage(imageManager.tTalk);
@@ -252,7 +254,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
                 break;
             }
 			case BUTTON_CHAIN_IGNORE: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->ignore_chain = mainGame->btnChainIgnore->isPressed();
 				mainGame->always_chain = false;
 				mainGame->chain_when_avail = false;
@@ -260,7 +262,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CHAIN_ALWAYS: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->always_chain = mainGame->btnChainAlways->isPressed();
 				mainGame->ignore_chain = false;
 				mainGame->chain_when_avail = false;
@@ -268,7 +270,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CHAIN_WHENAVAIL: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->chain_when_avail = mainGame->btnChainWhenAvail->isPressed();
 				mainGame->always_chain = false;
 				mainGame->ignore_chain = false;
@@ -276,18 +278,18 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CANCEL_OR_FINISH: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				CancelOrFinish();
 				break;
 			}
 			case BUTTON_MSG_OK: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->HideElement(mainGame->wMessage);
 				mainGame->actionSignal.Set();
 				break;
 			}
 			case BUTTON_YES: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				switch(mainGame->dInfo.curMsg) {
 				case MSG_SELECT_YESNO:
 				case MSG_SELECT_EFFECTYN: {
@@ -321,7 +323,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_NO: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				switch(mainGame->dInfo.curMsg) {
 				case MSG_SELECT_YESNO:
 				case MSG_SELECT_EFFECTYN: {
@@ -374,7 +376,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_OPTION_PREV: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				selected_option--;
 				mainGame->btnOptionn->setVisible(true);
 				if(selected_option == 0)
@@ -383,7 +385,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_OPTION_NEXT: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				selected_option++;
 				mainGame->btnOptionp->setVisible(true);
 				if(selected_option == select_options.size() - 1)
@@ -396,7 +398,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_OPTION_2: 
 			case BUTTON_OPTION_3: 
 			case BUTTON_OPTION_4: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				int step = mainGame->scrOption->isVisible() ? mainGame->scrOption->getPos() : 0;
 				selected_option = id - BUTTON_OPTION_0 + step;
 				SetResponseSelectedOption();
@@ -404,7 +406,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_OPTION_OK: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				SetResponseSelectedOption();
 				ShowCancelOrFinishButton(0);
 				break;
@@ -421,7 +423,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			case BUTTON_ANNUMBER_10:
 			case BUTTON_ANNUMBER_11:
 			case BUTTON_ANNUMBER_12: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				for(int i = 0; i < (int)mainGame->cbANNumber->getItemCount(); ++i) {
 					if(id - BUTTON_ANNUMBER_1 + 1 == mainGame->cbANNumber->getItemData(i)) {
 						mainGame->cbANNumber->setSelected(i);
@@ -435,13 +437,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_ANNUMBER_OK: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				DuelClient::SetResponseI(mainGame->cbANNumber->getSelected());
 				mainGame->HideElement(mainGame->wANNumber, true);
 				break;
 			}
 			case BUTTON_ANCARD_OK: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				int sel = mainGame->lstANCard->getSelected();
 				if(sel == -1)
 					break;
@@ -1984,14 +1986,14 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 		case irr::gui::EGET_BUTTON_CLICKED: {
 			switch(id) {
 			case BUTTON_CLEAR_LOG: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->lstLog->clear();
 				mainGame->logParam.clear();
 				return true;
 				break;
 			}
 			case BUTTON_SYS_MSG_OK: {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->HideElement(mainGame->wSysMessage);
 				return true;
 				break;
@@ -2061,12 +2063,14 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				break;
 			}
 			case CHECKBOX_ENABLE_SOUND: {
-				mainGame->soundManager->EnableSounds(mainGame->chkEnableSound->isChecked());
+				if(!mainGame->chkEnableSound->isChecked())
+					soundManager.StopSound();
 				return true;
 				break;
 			}
 			case CHECKBOX_ENABLE_MUSIC: {
-				mainGame->soundManager->EnableMusic(mainGame->chkEnableMusic->isChecked());
+				if(!mainGame->chkEnableMusic->isChecked())
+					soundManager.StopBGM();
 				if (mainGame->gameConf.enable_music) {
 				    mainGame->imgVol->setImage(imageManager.tPlay);
                 } else {
@@ -2131,8 +2135,8 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 			case SCROLL_VOLUME: {
 				mainGame->gameConf.sound_volume = (double)mainGame->scrSoundVolume->getPos() / 100;
 				mainGame->gameConf.music_volume = (double)mainGame->scrMusicVolume->getPos() / 100;
-				mainGame->soundManager->SetSoundVolume(mainGame->gameConf.sound_volume);
-				mainGame->soundManager->SetMusicVolume(mainGame->gameConf.music_volume);
+				soundManager.SetSoundVolume(mainGame->gameConf.sound_volume);
+				soundManager.SetMusicVolume(mainGame->gameConf.music_volume);
 				return true;
 				break;
 			}

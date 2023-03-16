@@ -36,13 +36,52 @@ class OpenALSoundLayer {
 public:
     OpenALSoundLayer(const std::unique_ptr<OpenALSingleton>& openal);
     ~OpenALSoundLayer();
+
     bool load(const std::string& filename);
-    int play(const std::string& filename, bool loop);
+
+    int play2D(const std::string& filename, bool loop = false, bool music = false);
+    int playMusic(const std::string& filename, bool loop = false, bool music = true) {
+        return play2D(filename, loop, music);
+    }
+
     bool exists(int sound);
+
     void stop(int sound);
+
     void stopAll();
-    void setVolume(float gain);
+    void stopAllSounds() {
+        return stopAll();
+    }
+
+    void setSoundVolume(float gain);
+
+    bool isCurrentlyPlaying(const std::string& name);
+
+	std::string GetFileName(std::string file) {
+		std::replace(file.begin(), file.end(), '\\', '/');
+		size_t dashpos = file.find_last_of("/");
+		if(dashpos == std::wstring::npos)
+			dashpos = 0;
+		else
+			dashpos++;
+		size_t dotpos = file.find_last_of(".");
+		if(dotpos == std::string::npos)
+			dotpos = file.size();
+		std::string name = file.substr(dashpos, dotpos - dashpos);
+		return name;
+	}
+
+	std::string GetFileExtension(std::string file) {
+		size_t dotpos = file.find_last_of(".");
+		if(dotpos == std::string::npos)
+			return "";
+		std::string extension = file.substr(dotpos + 1);
+		std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+		return extension;
+	}
+
 private:
+    std::string music_name;
     void maintain();
     const std::unique_ptr<OpenALSingleton>& openal;
     std::unordered_map<std::string, std::shared_ptr<OpenALSoundBuffer>> buffers;

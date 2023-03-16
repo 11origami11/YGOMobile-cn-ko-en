@@ -1,202 +1,236 @@
 #include "sound_manager.h"
-#include "config.h"
-#include "game.h"
-#include "data_manager.h"
 
 namespace ygo {
 
-bool SoundManager::Init(double sounds_volume, double music_volume, bool sounds_enabled, bool music_enabled, void* payload) {
-	soundsEnabled = sounds_enabled;
-	musicEnabled = music_enabled;
-	rnd.seed(time(0));
+SoundManager soundManager;
+
+bool SoundManager::Init() {
 	bgm_scene = -1;
-	bgm_process = true;
 	RefreshBGMList();
-	RefreshChantsList();
-    try {
-        openal = Utils::make_unique<YGOpen::OpenALSingleton>();
-        sfx = Utils::make_unique<YGOpen::OpenALSoundLayer>(openal);
-        bgm = Utils::make_unique<YGOpen::OpenALSoundLayer>(openal);
-        sfx->setVolume(sounds_volume);
-        bgm->setVolume(music_volume);
-        return true;
-    }
-    catch (std::runtime_error& e) {
-        return soundsEnabled = musicEnabled = false;
-    }
+	try {
+		openal = make_unique<YGOpen::OpenALSingleton>();
+		engineSound = make_unique<YGOpen::OpenALSoundLayer>(openal);
+		engineMusic = make_unique<YGOpen::OpenALSoundLayer>(openal);
+		return true;
+	}
+	catch (std::runtime_error& e) {
+		return false;
+	}
 }
 void SoundManager::RefreshBGMList() {
-	Utils::Makedirectory(TEXT("./sound/BGM/"));
-	Utils::Makedirectory(TEXT("./sound/BGM/duel"));
-	Utils::Makedirectory(TEXT("./sound/BGM/menu"));
-	Utils::Makedirectory(TEXT("./sound/BGM/deck"));
-	Utils::Makedirectory(TEXT("./sound/BGM/advantage"));
-	Utils::Makedirectory(TEXT("./sound/BGM/disadvantage"));
-	Utils::Makedirectory(TEXT("./sound/BGM/win"));
-	Utils::Makedirectory(TEXT("./sound/BGM/lose"));
-	Utils::Makedirectory(TEXT("./sound/chants"));
-	RefreshBGMDir(TEXT(""), BGM::DUEL);
-	RefreshBGMDir(TEXT("duel"), BGM::DUEL);
-	RefreshBGMDir(TEXT("menu"), BGM::MENU);
-	RefreshBGMDir(TEXT("deck"), BGM::DECK);
-	RefreshBGMDir(TEXT("advantage"), BGM::ADVANTAGE);
-	RefreshBGMDir(TEXT("disadvantage"), BGM::DISADVANTAGE);
-	RefreshBGMDir(TEXT("win"), BGM::WIN);
-	RefreshBGMDir(TEXT("lose"), BGM::LOSE);
+	RefershBGMDir(L"", BGM_DUEL);
+	RefershBGMDir(L"duel", BGM_DUEL);
+	RefershBGMDir(L"menu", BGM_MENU);
+	RefershBGMDir(L"deck", BGM_DECK);
+	RefershBGMDir(L"advantage", BGM_ADVANTAGE);
+	RefershBGMDir(L"disadvantage", BGM_DISADVANTAGE);
+	RefershBGMDir(L"win", BGM_WIN);
+	RefershBGMDir(L"lose", BGM_LOSE);
 }
-void SoundManager::RefreshBGMDir(path_string path, BGM scene) {
-	for(auto& file : Utils::FindfolderFiles(TEXT("./sound/BGM/") + path, { TEXT("mp3"), TEXT("ogg"), TEXT("wav") })) {
-		auto conv = Utils::ToUTF8IfNeeded(path + TEXT("/") + file);
-		BGMList[BGM::ALL].push_back(conv);
-		BGMList[scene].push_back(conv);
-	}
-}
-void SoundManager::RefreshChantsList() {
-	for(auto& file : Utils::FindfolderFiles(TEXT("./sound/chants"), { TEXT("mp3"), TEXT("ogg"), TEXT("wav") })) {
-		auto scode = Utils::GetFileName(TEXT("./sound/chants/") + file);
-		try {
-			unsigned int code = std::stoi(scode);
-			if (code && !ChantsList.count(code))
-				ChantsList[code] = Utils::ToUTF8IfNeeded(file);
+void SoundManager::RefershBGMDir(std::wstring path, int scene) {
+	std::wstring search = L"./sound/BGM/" + path;
+	FileSystem::TraversalDir(search.c_str(), [this, &path, scene](const wchar_t* name, bool isdir) {
+		if(!isdir && wcsrchr(name, '.') && (!wcsncasecmp(wcsrchr(name, '.'), L".mp3", 4) || !wcsncasecmp(wcsrchr(name, '.'), L".ogg", 4) || !wcsncasecmp(wcsrchr(name, '.'), L".wav", 4))) {
+			std::wstring filename = path + L"/" + name;
+			BGMList[BGM_ALL].push_back(filename);
+			BGMList[scene].push_back(filename);
 		}
-		catch (std::exception& e) {
-			Utils::Deletefile(Utils::ToUTF8IfNeeded(TEXT("./sound/chants/") + file));
-		}
-	}
+	});
 }
-void SoundManager::PlaySoundEffect(SFX sound) {
-    static const std::map<SFX, const char*> fx = {
-        {SUMMON, "./sound/summon.wav"},
-        {SPECIAL_SUMMON, "./sound/specialsummon.wav"},
-        {ACTIVATE, "./sound/activate.wav"},
-        {SET, "./sound/set.wav"},
-        {FLIP, "./sound/flip.wav"},
-        {REVEAL, "./sound/reveal.wav"},
-        {EQUIP, "./sound/equip.wav"},
-        {DESTROYED, "./sound/destroyed.wav"},
-        {BANISHED, "./sound/banished.wav"},
-        {TOKEN, "./sound/token.wav"},
-        {NEGATE, "./sound/negate.wav"},
-        {ATTACK, "./sound/attack.wav"},
-        {DIRECT_ATTACK, "./sound/directattack.wav"},
-        {DRAW, "./sound/draw.wav"},
-        {SHUFFLE, "./sound/shuffle.wav"},
-        {DAMAGE, "./sound/damage.wav"},
-        {RECOVER, "./sound/gainlp.wav"},
-        {COUNTER_ADD, "./sound/addcounter.wav"},
-        {COUNTER_REMOVE, "./sound/removecounter.wav"},
-        {COIN, "./sound/coinflip.wav"},
-        {DICE, "./sound/diceroll.wav"},
-        {NEXT_TURN, "./sound/nextturn.wav"},
-        {PHASE, "./sound/phase.wav"},
-        {SOUND_MENU, "./sound/menu.wav"},
-        {BUTTON, "./sound/button.wav"},
-        {INFO, "./sound/info.wav"},
-        {QUESTION, "./sound/question.wav"},
-        {CARD_PICK, "./sound/cardpick.wav"},
-        {CARD_DROP, "./sound/carddrop.wav"},
-        {PLAYER_ENTER, "./sound/playerenter.wav"},
-        {CHAT, "./sound/chatmessage.wav"}
-    };
-    if (!soundsEnabled) return;
-    if (sfx) sfx->play(fx.at(sound), false);
+void SoundManager::PlaySoundEffect(int sound) {
+	if(!mainGame->chkEnableSound->isChecked())
+		return;
+	engineSound->setSoundVolume((double)mainGame->scrSoundVolume->getPos() / 100);
+	switch(sound) {
+	case SOUND_SUMMON: {
+		engineSound->play2D("./sound/summon.wav");
+		break;
+	}
+	case SOUND_SPECIAL_SUMMON: {
+		engineSound->play2D("./sound/specialsummon.wav");
+		break;
+	}
+	case SOUND_ACTIVATE: {
+		engineSound->play2D("./sound/activate.wav");
+		break;
+	}
+	case SOUND_SET: {
+		engineSound->play2D("./sound/set.wav");
+		break;
+	}
+	case SOUND_FILP: {
+		engineSound->play2D("./sound/flip.wav");
+		break;
+	}
+	case SOUND_REVEAL: {
+		engineSound->play2D("./sound/reveal.wav");
+		break;
+	}
+	case SOUND_EQUIP: {
+		engineSound->play2D("./sound/equip.wav");
+		break;
+	}
+	case SOUND_DESTROYED: {
+		engineSound->play2D("./sound/destroyed.wav");
+		break;
+	}
+	case SOUND_BANISHED: {
+		engineSound->play2D("./sound/banished.wav");
+		break;
+	}
+	case SOUND_TOKEN: {
+		engineSound->play2D("./sound/token.wav");
+		break;
+	}
+	case SOUND_NEGATE: {
+		engineSound->play2D("./sound/negate.wav");
+		break;
+	}
+	case SOUND_ATTACK: {
+		engineSound->play2D("./sound/attack.wav");
+		break;
+	}
+	case SOUND_DIRECT_ATTACK: {
+		engineSound->play2D("./sound/directattack.wav");
+		break;
+	}
+	case SOUND_DRAW: {
+		engineSound->play2D("./sound/draw.wav");
+		break;
+	}
+	case SOUND_SHUFFLE: {
+		engineSound->play2D("./sound/shuffle.wav");
+		break;
+	}
+	case SOUND_DAMAGE: {
+		engineSound->play2D("./sound/damage.wav");
+		break;
+	}
+	case SOUND_RECOVER: {
+		engineSound->play2D("./sound/gainlp.wav");
+		break;
+	}
+	case SOUND_COUNTER_ADD: {
+		engineSound->play2D("./sound/addcounter.wav");
+		break;
+	}
+	case SOUND_COUNTER_REMOVE: {
+		engineSound->play2D("./sound/removecounter.wav");
+		break;
+	}
+	case SOUND_COIN: {
+		engineSound->play2D("./sound/coinflip.wav");
+		break;
+	}
+	case SOUND_DICE: {
+		engineSound->play2D("./sound/diceroll.wav");
+		break;
+	}
+	case SOUND_NEXT_TURN: {
+		engineSound->play2D("./sound/nextturn.wav");
+		break;
+	}
+	case SOUND_PHASE: {
+		engineSound->play2D("./sound/phase.wav");
+		break;
+	}
+	case SOUND_MENU: {
+		engineSound->play2D("./sound/menu.wav");
+		break;
+	}
+	case SOUND_BUTTON: {
+		engineSound->play2D("./sound/button.wav");
+		break;
+	}
+	case SOUND_INFO: {
+		engineSound->play2D("./sound/info.wav");
+		break;
+	}
+	case SOUND_QUESTION: {
+		engineSound->play2D("./sound/question.wav");
+		break;
+	}
+	case SOUND_CARD_PICK: {
+		engineSound->play2D("./sound/cardpick.wav");
+		break;
+	}
+	case SOUND_CARD_DROP: {
+		engineSound->play2D("./sound/carddrop.wav");
+		break;
+	}
+	case SOUND_PLAYER_ENTER: {
+		engineSound->play2D("./sound/playerenter.wav");
+		break;
+	}
+	case SOUND_CHAT: {
+		engineSound->play2D("./sound/chatmessage.wav");
+		break;
+	}
+	default:
+		break;
+	}
 }
 void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
 	if(element == mainGame->wMessage) {
-		PlaySoundEffect(INFO);
+		PlaySoundEffect(SOUND_INFO);
 	} else if(element == mainGame->wQuery) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wSurrender) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wOptions) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wANAttribute) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wANCard) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wANNumber) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wANRace) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wReplaySave) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	} else if(element == mainGame->wFTSelect) {
-		PlaySoundEffect(QUESTION);
+		PlaySoundEffect(SOUND_QUESTION);
 	}
 }
-void SoundManager::PlayMusic(const std::string& song, bool loop) {
-	if(!musicEnabled) return;
-    StopBGM();
-    if (bgm) bgmCurrent = bgm->play(song, loop);
-    bgm_process = true;
+void SoundManager::PlayMusic(char* song, bool loop) {
+	if(!mainGame->chkEnableMusic->isChecked())
+		return;
+	if(!engineMusic->isCurrentlyPlaying(song)) {
+		engineMusic->stopAllSounds();
+		engineMusic->setSoundVolume((double)mainGame->scrMusicVolume->getPos() / 100);
+		soundBGM = engineMusic->playMusic(song, loop);
+	}
 }
-void SoundManager::PlayBGM(BGM scene) {
+void SoundManager::PlayBGM(int scene) {
+	if(!mainGame->chkEnableMusic->isChecked())
+		return;
 	if(!mainGame->chkMusicMode->isChecked())
-		scene = BGM::ALL;
-	auto& list = BGMList[scene];
-	int count = list.size();
-	if (musicEnabled && (scene != bgm_scene || !bgm->exists(bgmCurrent)) && bgm_process && count > 0) {
+		scene = BGM_ALL;
+	char BGMName[1024];
+	if(scene != bgm_scene || !engineMusic->exists(soundBGM)) {
+		int count = BGMList[scene].size();
+		if(count <= 0)
+			return;
 		bgm_scene = scene;
-		int bgm = (std::uniform_int_distribution<>(0, count - 1))(rnd);
-		bgm_PlayingName = list[bgm];
-		std::string BGMName = "./sound/BGM/" + list[bgm];
+		int bgm = rand() % count;
+		auto name = BGMList[scene][bgm].c_str();
+		wchar_t fname[1024];
+		myswprintf(fname, L"./sound/BGM/%ls", name);
+		BufferIO::EncodeUTF8(fname, BGMName);
 		PlayMusic(BGMName, false);
 	}
 }
 void SoundManager::StopSound() {
-	sfx->stopAll();
+		engineSound->stopAll();
 }
 void SoundManager::StopBGM() {
-    bgm->stopAll();
-}
-bool SoundManager::PlayChant(unsigned int code) {
-    CardData cd;
-    if(dataManager.GetData(code, &cd) && (cd.alias != 0))
-        code = cd.alias;
-
-	if(ChantsList.count(code) && bgm_PlayingName != ChantsList[code]) {
-		if (bgm) {
-			bgm_process = false;
-			bgm_PlayingName = ChantsList[code];
-			PlayMusic("./sound/chants/" + ChantsList[code], false);
-		}
-		return true;
-	}
-	return false;
-}
-void SoundManager::PlayCustomSound(char* SoundName) {
-	if (!soundsEnabled) return;
-	if (access(SoundName, 0) != 0) return;
-	if (sfx) sfx->play(SoundName, false);
-}
-void SoundManager::PlayCustomBGM(char* BGMName) {
-	if (!musicEnabled || !mainGame->chkMusicMode->isChecked()) return;
-	if (access(BGMName, 0) != 0) return;
-
-	std::string CustomBGM = Utils::GetFileName(TEXT(BGMName));
-	if (bgm && bgm_PlayingName != CustomBGM) {
-		bgm_process = false;
-		bgm_PlayingName = CustomBGM;
-		PlayMusic(BGMName, false);
-	}
+	engineMusic->stopAllSounds();
 }
 void SoundManager::SetSoundVolume(double volume) {
-    if (sfx) sfx->setVolume(volume);
+	engineSound->setSoundVolume(volume);
 }
 void SoundManager::SetMusicVolume(double volume) {
-    if (bgm) bgm->setVolume(volume);
+	engineMusic->setSoundVolume(volume);
 }
-void SoundManager::EnableSounds(bool enable) {
-	soundsEnabled = enable;
-	if(!soundsEnabled) {
-		StopSound();
-	}
 }
-void SoundManager::EnableMusic(bool enable) {
-	musicEnabled = enable;
-	if(!musicEnabled) {
-        StopBGM();
-    }
-}
-
-} // namespace ygo

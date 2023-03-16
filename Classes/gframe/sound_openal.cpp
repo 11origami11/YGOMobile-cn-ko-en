@@ -3,7 +3,6 @@
 #include <iterator>
 #include <mpg123.h>
 #include <sndfile.h>
-#include "utils.h"
 
 namespace YGOpen {
 
@@ -127,7 +126,7 @@ static std::shared_ptr<OpenALSoundBuffer> loadSnd(const std::string& filename) {
 bool OpenALSoundLayer::load(const std::string& filename)
 {
     std::shared_ptr<OpenALSoundBuffer> data(nullptr);
-    auto ext = ygo::Utils::GetFileExtension(filename);
+    auto ext = GetFileExtension(filename);
     if (ext == "mp3") {
         data = loadMp3(filename);
     }
@@ -139,7 +138,7 @@ bool OpenALSoundLayer::load(const std::string& filename)
     return true;
 }
 
-int OpenALSoundLayer::play(const std::string& filename, bool loop)
+int OpenALSoundLayer::play2D(const std::string& filename, bool loop, bool music)
 {
     maintain();
     if (buffers.find(filename) == buffers.end()) {
@@ -162,8 +161,19 @@ int OpenALSoundLayer::play(const std::string& filename, bool loop)
         alDeleteSources(1, &source);
         return -1;
     }
+    if (music)
+        music_name = filename;
     playing.insert(source);
     return source;
+}
+
+bool OpenALSoundLayer::isCurrentlyPlaying(const std::string& name)
+{
+    if(music_name == name) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool OpenALSoundLayer::exists(int sound)
@@ -192,7 +202,7 @@ void OpenALSoundLayer::stopAll()
     playing.clear();
 }
 
-void OpenALSoundLayer::setVolume(float gain)
+void OpenALSoundLayer::setSoundVolume(float gain)
 {
     volume = gain;
     for (const auto& iter : playing) {

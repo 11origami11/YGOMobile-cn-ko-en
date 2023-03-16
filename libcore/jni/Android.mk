@@ -74,7 +74,6 @@ LOCAL_SRC_FILES := $(LOCAL_PATH)/android/android_tools.cpp \
 				$(LOCAL_PATH)/../Classes/gframe/sound_manager.cpp \
 				$(LOCAL_PATH)/../Classes/gframe/sound_openal.cpp \
 				$(LOCAL_PATH)/../Classes/gframe/tag_duel.cpp \
-				$(LOCAL_PATH)/../Classes/gframe/utils.cpp \
 				$(LOCAL_PATH)/jni/cn_garymb_ygomobile_core_IrrlichtBridge.cpp
 
 LOCAL_LDLIBS := -lEGL -llog -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES

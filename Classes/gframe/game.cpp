@@ -3,6 +3,7 @@
 #include "image_manager.h"
 #include "data_manager.h"
 #include "deck_manager.h"
+#include "sound_manager.h"
 #include "myfilesystem.h"
 #include "replay.h"
 #include "materials.h"
@@ -39,7 +40,7 @@ void Game::process(irr::SEvent &event) {
 void Game::stopBGM() {
     ALOGD("stop bgm");
 	gMutex.lock();
-	soundManager->StopBGM();
+	soundManager.StopBGM();
 	gMutex.unlock();
 }
 
@@ -48,19 +49,19 @@ void Game::playBGM() {
 	gMutex.lock();
 	if(dInfo.isStarted) {
 		if(dInfo.isFinished && showcardcode == 1)
-			soundManager->PlayBGM(SoundManager::BGM::WIN);
+			soundManager.PlayBGM(BGM_WIN);
 		else if(dInfo.isFinished && (showcardcode == 2 || showcardcode == 3))
-			soundManager->PlayBGM(SoundManager::BGM::LOSE);
+			soundManager.PlayBGM(BGM_LOSE);
 		else if(dInfo.lp[0] > 0 && dInfo.lp[0] <= dInfo.lp[1] / 2)
-			soundManager->PlayBGM(SoundManager::BGM::DISADVANTAGE);
+			soundManager.PlayBGM(BGM_DISADVANTAGE);
 		else if(dInfo.lp[0] > 0 && dInfo.lp[0] >= dInfo.lp[1] * 2)
-			soundManager->PlayBGM(SoundManager::BGM::ADVANTAGE);
+			soundManager.PlayBGM(BGM_ADVANTAGE);
 		else
-			soundManager->PlayBGM(SoundManager::BGM::DUEL);
+			soundManager.PlayBGM(BGM_DUEL);
 	} else if(is_building) {
-		soundManager->PlayBGM(SoundManager::BGM::DECK);
+		soundManager.PlayBGM(BGM_DECK);
 	} else {
-		soundManager->PlayBGM(SoundManager::BGM::MENU);
+		soundManager.PlayBGM(BGM_MENU);
 	}
 	gMutex.unlock();
 }
@@ -1200,8 +1201,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnCancelOrFinish = env->addButton(rect<s32>(200 * yScale, 205 * yScale, 310 * yScale, 255 * yScale), 0, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
         ChangeToIGUIImageButton(btnCancelOrFinish, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnCancelOrFinish->setVisible(false);
-	soundManager = Utils::make_unique<SoundManager>();
-	if(!soundManager->Init((double)gameConf.sound_volume / 100, (double)gameConf.music_volume / 100, gameConf.enable_sound, gameConf.enable_music, nullptr)) {
+    if(!soundManager.Init()) {
 		chkEnableSound->setChecked(false);
 		chkEnableSound->setEnabled(false);
 		chkEnableSound->setVisible(false);
@@ -1909,12 +1909,12 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatType[0] = player;
 	switch(player) {
 	case 0: //from host
-		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
+		soundManager.PlaySoundEffect(SOUND_CHAT);
 		chatMsg[0].append(dInfo.hostname);
 		chatMsg[0].append(L": ");
 		break;
 	case 1: //from client
-		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
+		soundManager.PlaySoundEffect(SOUND_CHAT);
 		chatMsg[0].append(dInfo.clientname);
 		chatMsg[0].append(L": ");
 		break;
@@ -1923,7 +1923,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		chatMsg[0].append(L": ");
 		break;
 	case 3: //client tag
-		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
+		soundManager.PlaySoundEffect(SOUND_CHAT);
 		chatMsg[0].append(dInfo.clientname_tag);
 		chatMsg[0].append(L": ");
 		break;
@@ -1932,7 +1932,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		chatMsg[0].append(L": ");
 		break;
 	case 8: //system custom message, no prefix.
-		soundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
+		soundManager.PlaySoundEffect(SOUND_CHAT);
 		chatMsg[0].append(L"[System]: ");
 		break;
 	case 9: //error message

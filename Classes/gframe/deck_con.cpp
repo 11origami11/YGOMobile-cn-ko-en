@@ -3,6 +3,7 @@
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "image_manager.h"
+#include "sound_manager.h"
 #include "myfilesystem.h"
 #include "game.h"
 #include "duelclient.h"
@@ -168,7 +169,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 *			}
 *		}*/
 		case irr::gui::EGET_BUTTON_CLICKED: {
-			mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+			soundManager.PlaySoundEffect(SOUND_BUTTON);
 			switch(id) {
 			case BUTTON_CLEAR_DECK: {
 				mainGame->gMutex.lock();
@@ -266,7 +267,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_SETTINGS: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
                 if (mainGame->imgSettings->isPressed()) {
 			        mainGame->ShowElement(mainGame->wSettings);
                     mainGame->imgSettings->setPressed(true);
@@ -277,13 +278,13 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			    break;
 			}
 			case BUTTON_CLOSE_SETTINGS: {
-			    mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+			    soundManager.PlaySoundEffect(SOUND_BUTTON);
 			    mainGame->HideElement(mainGame->wSettings);
                 mainGame->imgSettings->setPressed(false);
 			    break;
 			}
 			case BUTTON_SHOW_LOG: {
-                mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
                 if (mainGame->imgLog->isPressed()) {
 			        mainGame->ShowElement(mainGame->wLogs);
 			        mainGame->imgLog->setPressed(true);
@@ -294,13 +295,13 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			    break;
 			}
 			case BUTTON_CLOSE_LOG: {
-			    mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+			    soundManager.PlaySoundEffect(SOUND_BUTTON);
 			    mainGame->HideElement(mainGame->wLogs);
                 mainGame->imgLog->setPressed(false);
 			    break;
 			}
 			case BUTTON_BGM: {
-			    mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::BUTTON);
+			    soundManager.PlaySoundEffect(SOUND_BUTTON);
 			    if (mainGame->gameConf.enable_music) {
 			        mainGame->gameConf.enable_music = false;
 			        mainGame->imgVol->setImage(imageManager.tMute);
@@ -309,7 +310,8 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			        mainGame->imgVol->setImage(imageManager.tPlay);
 			    }
 			    mainGame->chkEnableMusic->setChecked(mainGame->gameConf.enable_music);
-			    mainGame->soundManager->EnableMusic(mainGame->chkEnableMusic->isChecked());
+				if(!mainGame->chkEnableMusic->isChecked())
+					soundManager.StopBGM();
 				break;
 			}
 			case BUTTON_EFFECT_FILTER: {
@@ -712,7 +714,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				if(deckManager.current_deck.main.size() != pre_mainc
 					|| deckManager.current_deck.extra.size() != pre_extrac
 					|| deckManager.current_deck.side.size() != pre_sidec) {
-					mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+					soundManager.PlaySoundEffect(SOUND_INFO);
 					mainGame->addMessageBox(L"", dataManager.GetSysString(1410));
 					break;
 				}
@@ -1092,7 +1094,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(!is_draging)
 				break;
-			mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_DROP);
+			soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 			bool pushed = false;
 			if(hovered_pos == 1)
 				pushed = push_main(draging_pointer, hovered_seq);
@@ -1129,7 +1131,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				auto pointer = dataManager.GetCodePointer(hovered_code);
 				if(pointer == dataManager._datas.end())
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_DROP);
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				if(hovered_pos == 1) {
 					if(push_side(pointer))
 						pop_main(hovered_seq);
@@ -1149,7 +1151,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					break;
 				if(readonly)
 					break;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_DROP);
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				if(hovered_pos == 1) {
 					pop_main(hovered_seq);
 				} else if(hovered_pos == 2) {
@@ -1166,7 +1168,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 						push_side(pointer);
 				}
 			} else {
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_PICK);
+				soundManager.PlaySoundEffect(SOUND_CARD_PICK);
 				if(click_pos == 1) {
 					push_side(draging_pointer);
 				} else if(click_pos == 2) {
@@ -1195,7 +1197,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			auto pointer = dataManager.GetCodePointer(hovered_code);
 			if(!check_limit(pointer))
 				break;
-			mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_PICK);
+			soundManager.PlaySoundEffect(SOUND_CARD_PICK);
 			if (hovered_pos == 1) {
 				if(!push_main(pointer))
 					push_side(pointer);
@@ -1214,7 +1216,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_MOUSE_MOVED: {
 			if(is_starting_dragging) {
 				is_draging = true;
-				mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::CARD_PICK);
+				soundManager.PlaySoundEffect(SOUND_CARD_PICK);
 				if(hovered_pos == 1)
 					pop_main(hovered_seq);
 				else if(hovered_pos == 2)
