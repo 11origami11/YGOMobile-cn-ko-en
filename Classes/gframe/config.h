@@ -59,13 +59,13 @@
 #define mywcscat wcscat_x
 #else
 #define myswprintf(buf, fmt, ...) swprintf(buf, 4096, fmt, ##__VA_ARGS__)
-#define mywcsncasecmp wcsncasecmp
-#define mystrncasecmp strncasecmp
 inline int _wtoi(const wchar_t * s) {
 	wchar_t * endptr;
 	return (int)wcstol(s, &endptr, 10);
 }
 #endif
+#define mywcsncasecmp wcsncasecmp
+#define mystrncasecmp strncasecmp
 #endif
 
 #include <irrlicht.h>

@@ -270,7 +270,7 @@ bool DeckManager::LoadDeck(const wchar_t* file, bool is_packlist) {
 		myswprintf(localfile, L"./deck/%ls.ydk", file);
 		reader = OpenDeckReader(localfile);
 	}
-	if(!reader && !wcsncasecmp(file, L"./pack", 6)) {
+	if(!reader && !mywcsncasecmp(file, L"./pack", 6)) {
 		wchar_t zipfile[64];
 		myswprintf(zipfile, L"%ls", file + 2);
 		reader = OpenDeckReader(zipfile);
