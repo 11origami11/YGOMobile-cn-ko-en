@@ -2069,12 +2069,11 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				break;
 			}
 			case CHECKBOX_ENABLE_MUSIC: {
-				if(!mainGame->chkEnableMusic->isChecked())
+				if(!mainGame->chkEnableMusic->isChecked()) {
 					soundManager.StopBGM();
-				if (mainGame->gameConf.enable_music) {
+					mainGame->imgVol->setImage(imageManager.tMute);
+				} else {
 				    mainGame->imgVol->setImage(imageManager.tPlay);
-                } else {
-                    mainGame->imgVol->setImage(imageManager.tMute);
                 }
 				return true;
 				break;
