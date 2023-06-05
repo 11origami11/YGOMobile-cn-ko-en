@@ -78,7 +78,6 @@ import cn.garymb.ygomobile.bean.events.DeckFile;
 import cn.garymb.ygomobile.core.IrrlichtBridge;
 import cn.garymb.ygomobile.lite.R;
 import cn.garymb.ygomobile.loader.CardLoader;
-import cn.garymb.ygomobile.loader.ImageLoader;
 import cn.garymb.ygomobile.ui.activities.BaseActivity;
 import cn.garymb.ygomobile.ui.activities.WebActivity;
 import cn.garymb.ygomobile.ui.adapters.CardListAdapter;
@@ -89,6 +88,7 @@ import cn.garymb.ygomobile.ui.cards.deck.DeckItem;
 import cn.garymb.ygomobile.ui.cards.deck.DeckItemTouchHelper;
 import cn.garymb.ygomobile.ui.cards.deck.DeckItemType;
 import cn.garymb.ygomobile.ui.cards.deck.DeckLayoutManager;
+import cn.garymb.ygomobile.ui.home.HomeActivity;
 import cn.garymb.ygomobile.ui.mycard.mcchat.util.ImageUtil;
 import cn.garymb.ygomobile.ui.plus.AOnGestureListener;
 import cn.garymb.ygomobile.ui.plus.DefaultOnBoomListener;
@@ -103,23 +103,20 @@ import cn.garymb.ygomobile.utils.YGODialogUtil;
 import cn.garymb.ygomobile.utils.YGOUtil;
 import cn.garymb.ygomobile.utils.glide.GlideCompat;
 import ocgcore.DataManager;
-import ocgcore.LimitManager;
-import ocgcore.StringManager;
 import ocgcore.data.Card;
 import ocgcore.data.LimitList;
 import ocgcore.enums.LimitType;
 
 public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewItemListener.OnItemListener, OnItemDragListener, YGODialogUtil.OnDeckMenuListener, CardLoader.CallBack, CardSearcher.CallBack {
-    private static String TAG = "DeckManagerFragment";
+    private static final String TAG = "DeckManagerFragment";
     protected DrawerLayout mDrawerLayout;
     protected RecyclerView mListView;
+    protected CardLoader mCardLoader;
     protected CardSearcher mCardSelector;
     protected CardListAdapter mCardListAdapter;
-    protected CardLoader mCardLoader;
     protected boolean isLoad = false;
-    protected ImageLoader mImageLoader;
-    protected StringManager mStringManager = DataManager.get().getStringManager();
-    protected LimitManager mLimitManager = DataManager.get().getLimitManager();
+    private HomeActivity activity;
+
     protected int screenWidth;
 
     //region ui onCreate/onDestroy
@@ -144,6 +141,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        activity = (HomeActivity)getActivity();
         layoutView = inflater.inflate(R.layout.fragment_deck_cards, container, false);
         AnimationShake2(layoutView);
         initView(layoutView);
@@ -158,10 +156,9 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
 
     public void initView(View layoutView) {
         screenWidth = getResources().getDisplayMetrics().widthPixels;
-        mImageLoader = new ImageLoader(true);
         mDrawerLayout = layoutView.findViewById(R.id.drawer_layout);
         mListView = layoutView.findViewById(R.id.list_cards);
-        mCardListAdapter = new CardListAdapter(getContext(), mImageLoader);
+        mCardListAdapter = new CardListAdapter(getContext(), activity.getImageLoader());
         mCardListAdapter.setEnableSwipe(true);
         mListView.setLayoutManager(new FastScrollLinearLayoutManager(getContext()));
         mListView.setAdapter(mCardListAdapter);
@@ -179,7 +176,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
         mLimitSpinner.setPopupBackgroundResource(R.color.colorNavy);
         mRecyclerView = layoutView.findViewById(R.id.grid_cards);
         mRecyclerView.setPadding(mRecyclerView.getPaddingLeft(), 0, mRecyclerView.getPaddingRight(), mRecyclerView.getPaddingBottom());
-        mRecyclerView.setAdapter((mDeckAdapater = new DeckAdapater(getContext(), mRecyclerView, getImageLoader())));
+        mRecyclerView.setAdapter((mDeckAdapater = new DeckAdapater(getContext(), mRecyclerView, activity.getImageLoader())));
         mRecyclerView.setLayoutManager(new DeckLayoutManager(getContext(), Constants.DECK_WIDTH_COUNT));
 
         mDeckItemTouchHelper = new DeckItemTouchHelper(mDeckAdapater);
@@ -248,10 +245,6 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
         });
     }
 
-    public ImageLoader getImageLoader() {
-        return mImageLoader;
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -291,7 +284,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
 
     @Override
     public void onDestroy() {
-        mImageLoader.close();
+        //mImageLoader.close();
         super.onDestroy();
     }
 
@@ -382,7 +375,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
             }
         }).done((rs) -> {
             dlg.dismiss();
-            setCurDeck(rs, file.getParent().equals(mSettings.getPackDeckDir()) ? true : false);
+            setCurDeck(rs, file.getParent().equals(mSettings.getPackDeckDir()));
         });
     }
 
@@ -392,8 +385,8 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
         VUiKit.defer().when(() -> {
             DataManager.get().load(true);
             //默认第一个卡表
-            if (mLimitManager.getCount() > 0) {
-                mCardLoader.setLimitList(mLimitManager.getTopLimit());
+            if (activity.getmLimitManager().getCount() > 0) {
+                mCardLoader.setLimitList(activity.getmLimitManager().getTopLimit());
             }
             File file = ydk;
             if (file == null || !file.exists()) {
@@ -420,7 +413,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
             initLimitListSpinners(mLimitSpinner, mCardLoader.getLimitList());
             //设置当前卡组
             if (rs.source != null) {
-                setCurDeck(rs, rs.source.getParent().equals(mSettings.getPackDeckDir()) ? true : false);
+                setCurDeck(rs, rs.source.getParent().equals(mSettings.getPackDeckDir()));
             } else {
                 setCurDeck(rs, false);
             }
@@ -542,7 +535,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
         if (cardInfo != null) {
             if (isShowCard()) return;
             if (mCardDetail == null) {
-                mCardDetail = new CardDetail((BaseActivity) getActivity(), getImageLoader(), mStringManager);
+                mCardDetail = new CardDetail((BaseActivity) getActivity(), activity.getImageLoader(), activity.getStringManager());
                 mCardDetail.setOnCardClickListener(new CardDetail.OnCardClickListener() {
                     @Override
                     public void onOpenUrl(Card cardInfo) {
@@ -1011,9 +1004,9 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
 
     private void initLimitListSpinners(Spinner spinner, LimitList cur) {
         List<SimpleSpinnerItem> items = new ArrayList<>();
-        List<String> limitLists = mLimitManager.getLimitNames();
+        List<String> limitLists = activity.getmLimitManager().getLimitNames();
         int index = -1;
-        int count = mLimitManager.getCount();
+        int count = activity.getmLimitManager().getCount();
         items.add(new SimpleSpinnerItem(0, getString(R.string.label_limitlist)));
         for (int i = 0; i < count; i++) {
             int j = i + 1;
@@ -1033,7 +1026,7 @@ public class DeckManagerFragment extends BaseFragemnt implements RecyclerViewIte
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setLimitList(mLimitManager.getLimit(SimpleSpinnerAdapter.getSelectText(spinner)));
+                setLimitList(activity.getmLimitManager().getLimit(SimpleSpinnerAdapter.getSelectText(spinner)));
             }
 
             @Override

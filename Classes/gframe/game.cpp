@@ -22,7 +22,7 @@
 #include <COGLESDriver.h>
 #endif
 
-const unsigned short PRO_VERSION = 0x1354;
+const unsigned short PRO_VERSION = 0x1360;
 
 namespace ygo {
 
@@ -446,11 +446,10 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 		ChangeToIGUIImageButton(btnHostPrepCancel, imageManager.tButton_S, imageManager.tButton_S_pressed);
 
 	//img always use *yScale to keep proportion
-	wCardImg = env->addImage(rect<s32>(1 * yScale, 1 * yScale, ( 1 + CARD_IMG_WIDTH + 20) * yScale, (1 + CARD_IMG_HEIGHT + 18) * yScale), 0, -1, 0, true);
-	wCardImg->setImage(imageManager.tDialog_S);
-	wCardImg->setScaleImage(true);
+	wCardImg = env->addStaticText(L"",rect<s32>(1 * yScale, 1 * yScale, ( 2 + CARD_IMG_WIDTH) * yScale, (2 + CARD_IMG_HEIGHT) * yScale), true, false, 0, -1, true);
+    wCardImg->setBackgroundColor(0xc0c0c0c0);
 	wCardImg->setVisible(false);
-	imgCard = env->addImage(rect<s32>(10 * yScale, 9 * yScale, (10 + CARD_IMG_WIDTH) * yScale, (9 + CARD_IMG_HEIGHT) * yScale), wCardImg);
+	imgCard = env->addImage(rect<s32>(2 * yScale, 2 * yScale, CARD_IMG_WIDTH * yScale, CARD_IMG_HEIGHT * yScale), wCardImg);
 	imgCard->setImage(imageManager.tCover[0]);
 	imgCard->setScaleImage(true);
 	imgCard->setUseAlphaChannel(true);
@@ -474,7 +473,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnEP->setVisible(false);
 
     //tab（changed）
-	wInfos = env->addWindow(rect<s32>(1 * xScale, 275 * yScale, 260 * xScale, 639 * yScale), false, L"");
+	wInfos = env->addWindow(rect<s32>(1 * xScale, (3 + CARD_IMG_HEIGHT) * yScale, 260 * xScale, 639 * yScale), false, L"");
 	wInfos->getCloseButton()->setVisible(false);
 	wInfos->setDraggable(false);
 	wInfos->setVisible(false);
@@ -488,16 +487,14 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	stDataInfo->setOverrideColor(SColor(255, 222, 215, 100));//255, 0, 0, 255
 	stSetName = env->addStaticText(L"", rect<s32>(10 * xScale, 83 * yScale, 260 * xScale, 106 * yScale), false, true, wInfos, -1, false);
 	stSetName->setOverrideColor(SColor(255, 255, 152, 42));//255, 0, 0, 255
-	stText = env->addStaticText(L"", rect<s32>(10 * xScale, 106 * yScale, 260 * xScale, 345 * yScale), false, true, wInfos, -1, false);
+	stText = env->addStaticText(L"", rect<s32>(10 * xScale, 106 * yScale, 250 * xScale, 340 * yScale), false, true, wInfos, -1, false);
     stText->setOverrideFont(textFont);
 	scrCardText = env->addScrollBar(false, rect<s32>(250 * xScale, 106 * yScale, 258 * xScale, 639 * yScale), wInfos, SCROLL_CARDTEXT);
 	scrCardText->setLargeStep(1);
 	scrCardText->setSmallStep(1);
 	scrCardText->setVisible(false);
-    btnReduceCardText = env->addButton(rect<s32>(140 * yScale, 340 * yScale, 165 * yScale, 365 * yScale), wInfos, BUTTON_REDUCE_CARD_TEXT, L"A-");
-    btnEnlargeCardText = env->addButton(rect<s32>(175 * yScale, 340 * yScale, 200 * yScale, 365 * yScale), wInfos, BUTTON_ENLARGE_CARD_TEXT, L"A+");
-	//imageButtons pallet
-    wPallet = env->addWindow(rect<s32>(262 * xScale, 275 * yScale, 307 * xScale, 639 * yScale), false, L"");
+    //imageButtons pallet
+    wPallet = env->addWindow(rect<s32>(262 * xScale, (3 + CARD_IMG_HEIGHT) * yScale, 307 * xScale, 639 * yScale), false, L"");
     wPallet->getCloseButton()->setVisible(false);
     wPallet->setDraggable(false);
     wPallet->setDrawTitlebar(false);
@@ -526,13 +523,21 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	} else {
 		imgVol->setImage(imageManager.tMute);
 	}
-	//Settings
+    //shift quick animation
+    imgQuickAnimation = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(0 * yScale, 165 * yScale, 45 * yScale, 210 * yScale), wPallet, BUTTON_QUICK_ANIMIATION);
+    imgQuickAnimation->setImageSize(core::dimension2di(28 * yScale, 28 * yScale));
+    if (gameConf.quick_animation) {
+        imgQuickAnimation->setImage(imageManager.tDoubleX);
+    } else {
+        imgQuickAnimation->setImage(imageManager.tOneX);
+    }
+    //Settings
 	imgSettings = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(0 * yScale, 0 * yScale, 45 * yScale, 45 * yScale), wPallet, BUTTON_SETTINGS);
 	imgSettings->setImageSize(core::dimension2di(28 * yScale, 28 * yScale));
 	imgSettings->setImage(imageManager.tSettings);
 	imgSettings->setIsPushButton(true);
-    wSettings = env->addWindow(rect<s32>(220 * xScale, 100 * yScale, 800 * xScale, 520 * yScale), false, dataManager.GetSysString(1273));
-    wSettings->setRelativePosition(recti(220 * xScale, 100 * yScale, 800 * xScale, 520 * yScale));
+    wSettings = env->addWindow(rect<s32>(220 * xScale, 80 * yScale, 800 * xScale, 540 * yScale), false, dataManager.GetSysString(1273));
+    wSettings->setRelativePosition(recti(220 * xScale, 80 * yScale, 800 * xScale, 540 * yScale));
     wSettings->getCloseButton()->setVisible(false);
 	wSettings->setVisible(false);
 	    ChangeToIGUIImageWindow(wSettings, &bgSettings, imageManager.tWindow);
@@ -580,6 +585,9 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	posY += 40 * yScale;
 	chkIgnore2 = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260, posY + 30 * yScale), wSettings, -1, dataManager.GetSysString(1291));
 	chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
+	posY += 40 * yScale;
+	chkHidePlayerName = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), wSettings, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
+	chkHidePlayerName->setChecked(gameConf.hide_player_name != 0);
 	posY += 40 * yScale;
 	chkIgnoreDeckChanges = env->addCheckBox(false, rect<s32>(posX, posY, posX + 260 * xScale, posY + 30 * yScale), wSettings, -1, dataManager.GetSysString(1357));
 	chkIgnoreDeckChanges->setChecked(gameConf.chkIgnoreDeckChanges != 0);
@@ -637,25 +645,25 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnSecond = env->addButton(rect<s32>(20 * xScale, 95 * yScale, 370 * xScale, 145 * yScale), wFTSelect, BUTTON_SECOND, dataManager.GetSysString(101));
         ChangeToIGUIImageButton(btnSecond, imageManager.tButton_L, imageManager.tButton_L_pressed, titleFont);
 	//message (370)
-	wMessage = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, dataManager.GetSysString(1216));
+	wMessage = env->addWindow(rect<s32>(470 * xScale, 160 * yScale, 860 * xScale, 380 * yScale), false, dataManager.GetSysString(1216));
 	wMessage->getCloseButton()->setVisible(false);
 	wMessage->setVisible(false);
 	    ChangeToIGUIImageWindow(wMessage, &bgMessage, imageManager.tDialog_L);
-	stMessage = env->addStaticText(L"", rect<s32>(20 * xScale, 20 * yScale, 370 * xScale, 100 * yScale), false, true, wMessage, -1, false);
+	stMessage = env->addStaticText(L"", rect<s32>(20 * xScale, 20 * yScale, 370 * xScale, 120 * yScale), false, true, wMessage, -1, false);
 	stMessage->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
-	btnMsgOK = env->addButton(rect<s32>(130 * xScale, 120 * yScale, 260 * xScale, 170 * yScale), wMessage, BUTTON_MSG_OK, dataManager.GetSysString(1211));
+	btnMsgOK = env->addButton(rect<s32>(130 * xScale, 150 * yScale, 260 * xScale, 200 * yScale), wMessage, BUTTON_MSG_OK, dataManager.GetSysString(1211));
         ChangeToIGUIImageButton(btnMsgOK, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	//system message (370)
 	wSysMessage = env->addWindow(rect<s32>(315 * xScale, 180 * yScale, 705 * xScale, 360 * yScale), false, dataManager.GetSysString(1216));
 	wSysMessage->getCloseButton()->setVisible(false);
 	wSysMessage->setVisible(false);
-	ChangeToIGUIImageWindow(wSysMessage, &bgSysMessage, imageManager.tDialog_L);
+		ChangeToIGUIImageWindow(wSysMessage, &bgSysMessage, imageManager.tDialog_L);
 	stSysMessage = env->addStaticText(L"", rect<s32>(20 * xScale, 20 * yScale, 370 * xScale, 100 * yScale), false, true, wSysMessage, -1, false);
 	stSysMessage->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	btnSysMsgOK = env->addButton(rect<s32>(130 * xScale, 120 * yScale, 260 * xScale, 170 * yScale), wSysMessage, BUTTON_SYS_MSG_OK, dataManager.GetSysString(1211));
-    ChangeToIGUIImageButton(btnSysMsgOK, imageManager.tButton_S, imageManager.tButton_S_pressed);
+    	ChangeToIGUIImageButton(btnSysMsgOK, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	//auto fade message (370)
-	wACMessage = env->addWindow(rect<s32>(490 * xScale, 240 * yScale, 840 * xScale, 300 * yScale), false, L"");
+	wACMessage = env->addWindow(rect<s32>(470 * xScale, 240 * yScale, 860 * xScale, 300 * yScale), false, L"");
 	wACMessage->getCloseButton()->setVisible(false);
 	wACMessage->setVisible(false);
 	wACMessage->setDrawBackground(false);
@@ -663,15 +671,15 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	stACMessage->setBackgroundColor(0x6011113d);
 	stACMessage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	//yes/no (370)
-	wQuery = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, dataManager.GetSysString(560));
+	wQuery = env->addWindow(rect<s32>(470 * xScale, 160 * yScale, 860 * xScale, 380 * yScale), false, dataManager.GetSysString(560));
 	wQuery->getCloseButton()->setVisible(false);
 	wQuery->setVisible(false);
         ChangeToIGUIImageWindow(wQuery, &bgQuery, imageManager.tDialog_L);
-	stQMessage =  env->addStaticText(L"", rect<s32>(20 * xScale, 20 * yScale, 370 * xScale, 110 * yScale), false, true, wQuery, -1, false);
+	stQMessage =  env->addStaticText(L"", rect<s32>(20 * xScale, 20 * yScale, 370 * xScale, 140 * yScale), false, true, wQuery, -1, false);
 	stQMessage->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
-	btnYes = env->addButton(rect<s32>(60 * xScale, 120 * yScale, 170 * xScale, 170 * yScale), wQuery, BUTTON_YES, dataManager.GetSysString(1213));
+	btnYes = env->addButton(rect<s32>(60 * xScale, 150 * yScale, 170 * xScale, 200 * yScale), wQuery, BUTTON_YES, dataManager.GetSysString(1213));
         ChangeToIGUIImageButton(btnYes, imageManager.tButton_S, imageManager.tButton_S_pressed);
-	btnNo = env->addButton(rect<s32>(210 * xScale, 120 * yScale, 320 * xScale, 170 * yScale), wQuery, BUTTON_NO, dataManager.GetSysString(1214));
+	btnNo = env->addButton(rect<s32>(210 * xScale, 150 * yScale, 320 * xScale, 200 * yScale), wQuery, BUTTON_NO, dataManager.GetSysString(1214));
         ChangeToIGUIImageButton(btnNo, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	//surrender yes/no (310)
 	wSurrender = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, dataManager.GetSysString(560));
@@ -710,7 +718,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	scrOption->setMin(0);
 #endif
 	//pos
-	wPosSelect = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, dataManager.GetSysString(561));
+	wPosSelect = env->addWindow(rect<s32>(470 * xScale, 160 * yScale, 860 * xScale, 380 * yScale), false, dataManager.GetSysString(561));
 	wPosSelect->getCloseButton()->setVisible(false);
 	wPosSelect->setVisible(false);
         ChangeToIGUIImageWindow(wPosSelect, &bgPosSelect, imageManager.tDialog_L);
@@ -792,7 +800,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnANCardOK = env->addButton(rect<s32>(95 * xScale, 440 * yScale, 205 * xScale, 490 * yScale), wANCard, BUTTON_ANCARD_OK, dataManager.GetSysString(1211));
         ChangeToIGUIImageButton(btnANCardOK, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	//announce attribute
-	wANAttribute = env->addWindow(rect<s32>(470 * xScale, 180 * yScale, 860 * xScale, 360 * yScale), false, dataManager.GetSysString(562));
+	wANAttribute = env->addWindow(rect<s32>(470 * xScale, 160 * yScale, 860 * xScale, 380 * yScale), false, dataManager.GetSysString(562));
 	wANAttribute->getCloseButton()->setVisible(false);
 	wANAttribute->setVisible(false);
 	    ChangeToIGUIImageWindow(wANAttribute, &bgANAttribute, imageManager.tDialog_L);
@@ -802,13 +810,13 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 		chkAttribute[i] = env->addCheckBox(false, rect<s32>((50 + (i % 4) * 80) * xScale, (60 + (i / 4) * 55) * yScale, (130 + (i % 4) * 80) * xScale, (90 + (i / 4) * 55) * yScale),
 		                                   wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter));
 	//announce race
-	wANRace = env->addWindow(rect<s32>(500 * xScale, 50 * yScale, 800 * xScale, 550 * yScale), false, dataManager.GetSysString(563));
+	wANRace = env->addWindow(rect<s32>(500 * xScale, 40 * yScale, 800 * xScale, 560 * yScale), false, dataManager.GetSysString(563));
 	wANRace->getCloseButton()->setVisible(false);
 	wANRace->setVisible(false);
 	    ChangeToIGUIImageWindow(wANRace, &bgANRace, imageManager.tDialog_S);
     stANRace = env->addStaticText(L"", rect<s32>(20 * xScale, 10 * yScale, 280 * xScale, 40 * yScale), false, false, wANRace, -1, false);
     stANRace->setTextAlignment(EGUIA_CENTER, EGUIA_CENTER);
-	for(int filter = 0x1, i = 0; i < 25; filter <<= 1, ++i)
+	for(int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i)
 		chkRace[i] = env->addCheckBox(false, rect<s32>((30 + (i % 3) * 90) * xScale, (60 + (i / 3) * 50) * yScale, (100 + (i % 3) * 90) * xScale, (110 + (i / 3) * 50) * yScale),
 		                              wANRace, CHECK_RACE, dataManager.FormatRace(filter));
 	//selection hint
@@ -983,7 +991,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	cbRace = CAndroidGUIComboBox::addAndroidComboBox(env, rect<s32>(60 * xScale, (40 + 75 / 6) * yScale, 190 * xScale, (60 + 75 / 6) * yScale), wFilter, COMBOBOX_RACE);
 	cbRace->setMaxSelectionRows(10);
 	cbRace->addItem(dataManager.GetSysString(1310), 0);
-	for(int filter = 0x1; filter != 0x2000000; filter <<= 1)
+	for(int filter = 0x1; filter < (1 << RACES_COUNT); filter <<= 1)
 		cbRace->addItem(dataManager.FormatRace(filter), filter);
 	env->addStaticText(dataManager.GetSysString(1322), rect<s32>(205 * xScale, 28 * yScale, 280 * xScale, 48 * yScale), false, false, wFilter);
 	ebAttack = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(260 * xScale, 26 * yScale, 340 * xScale, 46 * yScale), wFilter, EDITBOX_INPUTS);
@@ -1009,15 +1017,16 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 		btnClearFilter = env->addButton(rect<s32>(205 * xScale, (80 + 125 / 6) * yScale, 255 * xScale, (100 + 125 / 6) * yScale), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
 			ChangeToIGUIImageButton(btnClearFilter, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	}
-	wCategories = env->addWindow(rect<s32>(630 * xScale, 60 * yScale, 1000 * xScale, 270 * yScale), false, L"");
+	wCategories = env->addWindow(rect<s32>(600 * xScale, 60 * yScale, 1000 * xScale, 440 * yScale), false, L"");
 	wCategories->getCloseButton()->setVisible(false);
 	wCategories->setDrawTitlebar(false);
 	wCategories->setDraggable(false);
 	wCategories->setVisible(false);
-	    ChangeToIGUIImageWindow(wCategories, &bgCategories, imageManager.tDialog_L);
-	btnCategoryOK = env->addButton(rect<s32>(135 * xScale, 175 * yScale, 235 * xScale, 200 * yScale), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
-	for(int i = 0; i < 32; ++i)
-		chkCategory[i] = env->addCheckBox(false, recti((10 + (i % 4) * 90)  * xScale, (10 + (i / 4) * 20) * yScale, (100 + (i % 4) * 90) * xScale, (40 + (i / 4) * 20) * yScale), wCategories, -1, dataManager.GetSysString(1100 + i));
+	    ChangeToIGUIImageWindow(wCategories, &bgCategories, imageManager.tWindow_V);
+	btnCategoryOK = env->addButton(rect<s32>(135 * xScale, 340 * yScale, 235 * xScale, 370 * yScale), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
+        ChangeToIGUIImageButton(btnCategoryOK, imageManager.tButton_L, imageManager.tButton_L_pressed);
+    for(int i = 0; i < 32; ++i)
+		chkCategory[i] = env->addCheckBox(false, recti((20 + (i % 4) * 90)  * xScale, (10 + (i / 4) * 40) * yScale, (120 + (i % 4) * 90) * xScale, (40 + (i / 4) * 40) * yScale), wCategories, -1, dataManager.GetSysString(1100 + i));
 	scrFilter = env->addScrollBar(false, recti(980 * xScale, 159 * yScale, 1020 * xScale, 629 * yScale), 0, SCROLL_FILTER);
 	scrFilter->setLargeStep(10);
 	scrFilter->setSmallStep(1);
@@ -1163,7 +1172,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnReplayExit = env->addButton(rect<s32>(0, 225 * yScale, 110 * yScale, 265 * yScale), wReplayControl, BUTTON_REPLAY_EXIT, dataManager.GetSysString(1347));
         ChangeToIGUIImageButton(btnReplayExit, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	//chat
-    imgChat = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(0 * yScale, 319 * yScale, 45 * yScale, 364 * yScale), wPallet, BUTTON_CHATTING);
+    imgChat = irr::gui::CGUIImageButton::addImageButton(env, rect<s32>(0 * yScale, 300 * yScale, 45 * yScale, 345 * yScale), wPallet, BUTTON_CHATTING);
     imgChat->setImageSize(core::dimension2di(28 * yScale, 28 * yScale));
     if (gameConf.chkIgnore1) {
         imgChat->setImage(imageManager.tShut);
@@ -1177,15 +1186,15 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	wChat->setVisible(false);
 	ebChatInput = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(3 * xScale, 2 * yScale, 710 * xScale, 28 * yScale), wChat, EDITBOX_CHAT);
 	//swap
-	btnSpectatorSwap = env->addButton(rect<s32>(200 * yScale, 70 * yScale, 310 * yScale, 110 * yScale), 0, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
+	btnSpectatorSwap = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 70 * yScale, 310 * yScale, 110 * yScale), 0, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
         ChangeToIGUIImageButton(btnSpectatorSwap, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnSpectatorSwap->setVisible(false);
 	//chain buttons
-	btnChainIgnore = env->addButton(rect<s32>(200 * yScale, 70 * yScale, 310 * yScale, 110 * yScale), 0, BUTTON_CHAIN_IGNORE, dataManager.GetSysString(1292));
+	btnChainIgnore = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 70 * yScale, 310 * yScale, 110 * yScale), 0, BUTTON_CHAIN_IGNORE, dataManager.GetSysString(1292));
         ChangeToIGUIImageButton(btnChainIgnore, imageManager.tButton_S, imageManager.tButton_S_pressed);
-	btnChainAlways = env->addButton(rect<s32>(200 * yScale, 115 * yScale, 310 * yScale, 155 * yScale), 0, BUTTON_CHAIN_ALWAYS, dataManager.GetSysString(1293));
+	btnChainAlways = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 115 * yScale, 310 * yScale, 155 * yScale), 0, BUTTON_CHAIN_ALWAYS, dataManager.GetSysString(1293));
         ChangeToIGUIImageButton(btnChainAlways, imageManager.tButton_S, imageManager.tButton_S_pressed);
-	btnChainWhenAvail = env->addButton(rect<s32>(200 * yScale, 160 * yScale, 310 * yScale, 200 * yScale), 0, BUTTON_CHAIN_WHENAVAIL, dataManager.GetSysString(1294));
+	btnChainWhenAvail = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 160 * yScale, 310 * yScale, 200 * yScale), 0, BUTTON_CHAIN_WHENAVAIL, dataManager.GetSysString(1294));
         ChangeToIGUIImageButton(btnChainWhenAvail, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnChainIgnore->setIsPushButton(true);
 	btnChainAlways->setIsPushButton(true);
@@ -1194,11 +1203,11 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnChainAlways->setVisible(false);
 	btnChainWhenAvail->setVisible(false);
 	//shuffle
-	btnShuffle = env->addButton(rect<s32>(200 * yScale, 205 * yScale, 310 * yScale, 245 * yScale), 0, BUTTON_CMD_SHUFFLE, dataManager.GetSysString(1297));
+	btnShuffle = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 205 * yScale, 310 * yScale, 245 * yScale), 0, BUTTON_CMD_SHUFFLE, dataManager.GetSysString(1297));
         ChangeToIGUIImageButton(btnShuffle, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnShuffle->setVisible(false);
 	//cancel or finish
-	btnCancelOrFinish = env->addButton(rect<s32>(200 * yScale, 205 * yScale, 310 * yScale, 255 * yScale), 0, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
+	btnCancelOrFinish = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 205 * yScale, 310 * yScale, 255 * yScale), 0, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
         ChangeToIGUIImageButton(btnCancelOrFinish, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnCancelOrFinish->setVisible(false);
     if(!soundManager.Init()) {
@@ -1232,7 +1241,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	btnBigCardZoomOut->setVisible(false);
 	btnBigCardClose->setVisible(false);
 	//leave/surrender/exit
-	btnLeaveGame = env->addButton(rect<s32>(200 * yScale, 1 * yScale, 310 * yScale, 51 * yScale), 0, BUTTON_LEAVE_GAME, L"");
+	btnLeaveGame = env->addButton(rect<s32>((3 + CARD_IMG_WIDTH) * yScale, 1 * yScale, 310 * yScale, 51 * yScale), 0, BUTTON_LEAVE_GAME, L"");
         ChangeToIGUIImageButton(btnLeaveGame, imageManager.tButton_S, imageManager.tButton_S_pressed);
 	btnLeaveGame->setVisible(false);
 	//tip
@@ -1257,7 +1266,7 @@ bool Game::Initialize(ANDROID_APP app, android::InitOptions *options) {
 	}
 #ifdef _IRR_ANDROID_PLATFORM_
 IGUIStaticText *text = env->addStaticText(L"",
-		rect<s32>(15,15,100,60), false, false, 0, GUI_INFO_FPS );
+		rect<s32>(1,1,100,45), false, false, 0, GUI_INFO_FPS );
 #endif
 	hideChat = false;
 	hideChatTimer = 0;
@@ -1371,13 +1380,13 @@ void Game::MainLoop() {
 		driver->enableMaterial2D(true);
 		driver->getMaterial2D().ZBuffer = ECFN_NEVER;
 		if(imageManager.tBackGround) {
-			driver->draw2DImage(imageManager.tBackGround, recti(0 * xScale, 0 * yScale, 1280 * xScale, 720 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
+			driver->draw2DImage(imageManager.tBackGround, recti(0 * xScale, 0 * yScale, 1920 * xScale, 1080 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
 		}
 		if(imageManager.tBackGround_menu) {
-			driver->draw2DImage(imageManager.tBackGround_menu, recti(0 * xScale, 0 * yScale, 1280 * xScale, 720 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
+			driver->draw2DImage(imageManager.tBackGround_menu, recti(0 * xScale, 0 * yScale, 1920 * xScale, 1080 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
 		}
 		if(imageManager.tBackGround_deck) {
-			driver->draw2DImage(imageManager.tBackGround_deck, recti(0 * xScale, 0 * yScale, 1280 * xScale, 720 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
+			driver->draw2DImage(imageManager.tBackGround_deck, recti(0 * xScale, 0 * yScale, 1920 * xScale, 1080 * yScale), recti(0, 0, imageManager.tBackGround->getOriginalSize().Width, imageManager.tBackGround->getOriginalSize().Height));
 		}
 		driver->enableMaterial2D(false);
 #endif
@@ -1498,7 +1507,7 @@ void Game::InitStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth, u32 cH
 			env->removeFocus(scrCardText);
 		return;
 	}
-	format_text = SetStaticText(pControl, cWidth - int(15 * xScale), font, text);
+	format_text = SetStaticText(pControl, cWidth, font, text);
 	u32 fontheight = font->getDimension(L"A").Height + font->getKerningHeight();
 	u32 step = (font->getDimension(format_text.c_str()).Height - cHeight) / fontheight + 1;
 	scrCardText->setVisible(true);
@@ -1743,6 +1752,7 @@ void Game::LoadConfig() {
 	gameConf.music_mode = android::getIntSetting(appMain, "music_mode", 1);
 	gameConf.use_lflist = android::getIntSetting(appMain, "use_lflist", 1);
 	gameConf.chkDefaultShowChain = android::getIntSetting(appMain, "chkDefaultShowChain", 0);
+	gameConf.hide_player_name = android::getIntSetting(appMain, "chkHidePlayerName", 0);
 	//defult Setting without checked
 	gameConf.default_rule = DEFAULT_DUEL_RULE;
     gameConf.hide_setname = 0;
@@ -1802,6 +1812,8 @@ void Game::SaveConfig() {
 	    android::saveIntSetting(appMain, "use_lflist", gameConf.use_lflist);
 	gameConf.chkDefaultShowChain = chkDefaultShowChain->isChecked() ? 1 : 0;
 	    android::saveIntSetting(appMain, "chkDefaultShowChain", gameConf.chkDefaultShowChain);
+	gameConf.hide_player_name  = chkHidePlayerName->isChecked() ? 1 : 0;
+		android::saveIntSetting(appMain, "chkHidePlayerName", gameConf.hide_player_name);
 //gameConf.control_mode = control_mode->isChecked()?1:0;
 //	  android::saveIntSetting(appMain, "control_mode", gameConf.control_mode);
 }
@@ -1814,8 +1826,8 @@ void Game::ShowCardInfo(int code) {
 	imgCard->setImage(imageManager.GetTexture(code));
 	imgCard->setScaleImage(true);
 	if(cd.alias != 0 && (cd.alias - code < CARD_ARTWORK_VERSIONS_OFFSET || code - cd.alias < CARD_ARTWORK_VERSIONS_OFFSET))
-		myswprintf(formatBuffer, L"%ls", dataManager.GetName(cd.alias));
-	else myswprintf(formatBuffer, L"%ls", dataManager.GetName(code));
+		myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(cd.alias), cd.alias);
+	else myswprintf(formatBuffer, L"%ls[%08d]", dataManager.GetName(code), code);
 	stName->setText(formatBuffer);
 	int offset = 0;
 	if(!gameConf.hide_setname) {
@@ -1826,7 +1838,7 @@ void Game::ShowCardInfo(int code) {
 				sc = aptr->second.setcode;
 		}
 		if(sc) {
-			offset = 23;
+			offset = 23;// *yScale;
 			myswprintf(formatBuffer, L"%ls%ls", dataManager.GetSysString(1329), dataManager.FormatSetName(sc));
 			stSetName->setText(formatBuffer);
 		} else
@@ -1868,15 +1880,15 @@ void Game::ShowCardInfo(int code) {
 		}
 		stDataInfo->setText(formatBuffer);
 		stSetName->setRelativePosition(rect<s32>(10 * xScale, 83 * yScale, 250 * xScale, 106 * yScale));
-		stText->setRelativePosition(rect<s32>(10 * xScale, (83 + offset) * yScale, 260 * xScale, 345 * yScale));
-		scrCardText->setRelativePosition(rect<s32>(255 * xScale, (83 + offset) * yScale, 258 * xScale, 345 * yScale));
+		stText->setRelativePosition(rect<s32>(10 * xScale, (83 + offset) * yScale, 251 * xScale, 340 * yScale));
+		scrCardText->setRelativePosition(rect<s32>(255 * xScale, (83 + offset) * yScale, 258 * xScale, 340 * yScale));
 	} else {
 		myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cd.type));
 		stInfo->setText(formatBuffer);
 		stDataInfo->setText(L"");
 		stSetName->setRelativePosition(rect<s32>(10 * xScale, 60 * yScale, 250 * xScale, 106 * yScale));
-		stText->setRelativePosition(rect<s32>(10 * xScale, (60 + offset) * yScale, 260 * xScale, 345 * yScale));
-		scrCardText->setRelativePosition(rect<s32>(255 * xScale, (60 + offset) * yScale, 258 * xScale, 345 * yScale));
+		stText->setRelativePosition(rect<s32>(10 * xScale, (60 + offset) * yScale, 251 * xScale, 340 * yScale));
+		scrCardText->setRelativePosition(rect<s32>(255 * xScale, (60 + offset) * yScale, 258 * xScale, 340 * yScale));
 	}
 	showingtext = dataManager.GetText(code);
 	const auto& tsize = stText->getRelativePosition();
@@ -1907,6 +1919,8 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 	chatMsg[0].clear();
 	chatTiming[0] = 1200;
 	chatType[0] = player;
+	if(gameConf.hide_player_name && player < 4)
+		player = 10;
 	switch(player) {
 	case 0: //from host
 		soundManager.PlaySoundEffect(SOUND_CHAT);
@@ -1919,6 +1933,7 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		chatMsg[0].append(L": ");
 		break;
 	case 2: //host tag
+		soundManager.PlaySoundEffect(SOUND_CHAT);
 		chatMsg[0].append(dInfo.hostname_tag);
 		chatMsg[0].append(L": ");
 		break;
@@ -1937,6 +1952,9 @@ void Game::AddChatMsg(const wchar_t* msg, int player) {
 		break;
 	case 9: //error message
 		chatMsg[0].append(L"[Script Error]: ");
+		break;
+	case 10: //hidden name
+		chatMsg[0].append(L"[********]: ");
 		break;
 	default: //from watcher or unknown
 		if(player < 11 || player > 19)

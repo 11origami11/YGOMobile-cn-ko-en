@@ -472,8 +472,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			mainGame->stHostPrepDuelist[2]->setVisible(false);
 			mainGame->stHostPrepDuelist[3]->setVisible(false);
 		}
-		for(int i = 0; i < 4; ++i)
+		for(int i = 0; i < 4; ++i) {
 			mainGame->chkHostPrepReady[i]->setChecked(false);
+			mainGame->stHostPrepDuelist[i]->setText(L"");
+			mainGame->stHostPrepDuelist[i]->setToolTipText(L"");
+		}
 		mainGame->btnHostPrepReady->setVisible(true);
 		mainGame->btnHostPrepNotReady->setVisible(false);
 		mainGame->dInfo.time_limit = pkt->info.time_limit;
@@ -483,10 +486,6 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->deckBuilder.filterList = deckManager.GetLFListContent(pkt->info.lflist);
 		if(mainGame->deckBuilder.filterList == nullptr)
 			mainGame->deckBuilder.filterList = &deckManager._lfList[0].content;
-		mainGame->stHostPrepDuelist[0]->setText(L"");
-		mainGame->stHostPrepDuelist[1]->setText(L"");
-		mainGame->stHostPrepDuelist[2]->setText(L"");
-		mainGame->stHostPrepDuelist[3]->setText(L"");
 		mainGame->stHostPrepOB->setText(L"");
 		mainGame->SetStaticText(mainGame->stHostPrepRule, 180 * mainGame->xScale, mainGame->guiFont, str.c_str());
 		mainGame->RefreshCategoryDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
@@ -625,11 +624,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				mainGame->btnSpectatorSwap->setVisible(true);
 			}
 			if(selftype != 1) {
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getText(), mainGame->dInfo.hostname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getText(), mainGame->dInfo.clientname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getToolTipText().c_str(), mainGame->dInfo.hostname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getToolTipText().c_str(), mainGame->dInfo.clientname, 20);
 			} else {
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getText(), mainGame->dInfo.hostname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getText(), mainGame->dInfo.clientname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getToolTipText().c_str(), mainGame->dInfo.hostname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getToolTipText().c_str(), mainGame->dInfo.clientname, 20);
 			}
 		} else {
 			if(selftype > 3) {
@@ -639,15 +638,15 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				mainGame->btnSpectatorSwap->setVisible(true);
 			}
 			if(selftype > 1 && selftype < 4) {
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[2]->getText(), mainGame->dInfo.hostname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[3]->getText(), mainGame->dInfo.hostname_tag, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getText(), mainGame->dInfo.clientname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getText(), mainGame->dInfo.clientname_tag, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[2]->getToolTipText().c_str(), mainGame->dInfo.hostname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[3]->getToolTipText().c_str(), mainGame->dInfo.hostname_tag, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getToolTipText().c_str(), mainGame->dInfo.clientname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getToolTipText().c_str(), mainGame->dInfo.clientname_tag, 20);
 			} else {
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getText(), mainGame->dInfo.hostname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getText(), mainGame->dInfo.hostname_tag, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[2]->getText(), mainGame->dInfo.clientname, 20);
-				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[3]->getText(), mainGame->dInfo.clientname_tag, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[0]->getToolTipText().c_str(), mainGame->dInfo.hostname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[1]->getToolTipText().c_str(), mainGame->dInfo.hostname_tag, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[2]->getToolTipText().c_str(), mainGame->dInfo.clientname, 20);
+				BufferIO::CopyWStr(mainGame->stHostPrepDuelist[3]->getToolTipText().c_str(), mainGame->dInfo.clientname_tag, 20);
 			}
 			mainGame->dInfo.tag_player[0] = false;
 			mainGame->dInfo.tag_player[1] = false;
@@ -811,7 +810,11 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 				BufferIO::CopyWStr(pkt->name, mainGame->dInfo.clientname, 20);
 		}
 		mainGame->gMutex.lock();
-		mainGame->stHostPrepDuelist[pkt->pos]->setText(name);
+		if(mainGame->gameConf.hide_player_name)
+			mainGame->stHostPrepDuelist[pkt->pos]->setText(L"[********]");
+		else
+			mainGame->stHostPrepDuelist[pkt->pos]->setText(name);
+		mainGame->stHostPrepDuelist[pkt->pos]->setToolTipText(name);
 		mainGame->stHostPrepDuelist[pkt->pos]->setBackgroundColor(0x60045f6a);
 		mainGame->gMutex.unlock();
 		break;
@@ -825,10 +828,15 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 		mainGame->gMutex.lock();
 		if(state < 8) {
 			soundManager.PlaySoundEffect(SOUND_PLAYER_ENTER);
-			wchar_t* prename = (wchar_t*)mainGame->stHostPrepDuelist[pos]->getText();
-			mainGame->stHostPrepDuelist[state]->setText(prename);
+			wchar_t* prename = (wchar_t*)mainGame->stHostPrepDuelist[pos]->getToolTipText().c_str();
+			if(mainGame->gameConf.hide_player_name)
+				mainGame->stHostPrepDuelist[state]->setText(L"[********]");
+			else
+				mainGame->stHostPrepDuelist[state]->setText(prename);
+			mainGame->stHostPrepDuelist[state]->setToolTipText(prename);
 			mainGame->stHostPrepDuelist[state]->setBackgroundColor(0x60045f6a);
 			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			mainGame->stHostPrepDuelist[pos]->setToolTipText(L"");
 			mainGame->stHostPrepDuelist[pos]->setDrawBackground(false);
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 			if(pos == 0)
@@ -853,6 +861,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			}
 		} else if(state == PLAYERCHANGE_LEAVE) {
 			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			mainGame->stHostPrepDuelist[pos]->setToolTipText(L"");
 			mainGame->stHostPrepDuelist[pos]->setDrawBackground(false);
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 		} else if(state == PLAYERCHANGE_OBSERVE) {
@@ -860,6 +869,7 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			wchar_t watchbuf[32];
 			myswprintf(watchbuf, L"%ls%d", dataManager.GetSysString(1253), watching);
 			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			mainGame->stHostPrepDuelist[pos]->setToolTipText(L"");
             mainGame->stHostPrepDuelist[pos]->setDrawBackground(false);
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 			mainGame->stHostPrepOB->setText(watchbuf);
@@ -1462,7 +1472,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 			myswprintf(textBuffer, dataManager.GetDesc(desc), dataManager.GetName(code));
 		}
 		mainGame->gMutex.lock();
-		mainGame->SetStaticText(mainGame->stQMessage, 390 * mainGame->xScale, mainGame->guiFont, textBuffer);
+		mainGame->SetStaticText(mainGame->stQMessage, 350 * mainGame->xScale, mainGame->guiFont, textBuffer);
 		mainGame->PopupElement(mainGame->wQuery);
 		mainGame->gMutex.unlock();
 		return false;
@@ -1472,7 +1482,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		int desc = BufferIO::ReadInt32(pbuf);
 		mainGame->dField.highlighting_card = 0;
 		mainGame->gMutex.lock();
-		mainGame->SetStaticText(mainGame->stQMessage, 390 * mainGame->xScale, mainGame->guiFont, dataManager.GetDesc(desc));
+		mainGame->SetStaticText(mainGame->stQMessage, 350 * mainGame->xScale, mainGame->guiFont, dataManager.GetDesc(desc));
 		mainGame->PopupElement(mainGame->wQuery);
 		mainGame->gMutex.unlock();
 		return false;
@@ -1732,7 +1742,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 					myswprintf(textBuffer, L"%ls\n%ls\n%ls", event_string, dataManager.GetSysString(222), dataManager.GetSysString(223));
 				else
 					myswprintf(textBuffer, L"%ls\n%ls", event_string, dataManager.GetSysString(203));
-				mainGame->SetStaticText(mainGame->stQMessage, 390 * mainGame->xScale, mainGame->guiFont, textBuffer);
+				mainGame->SetStaticText(mainGame->stQMessage, 350 * mainGame->xScale, mainGame->guiFont, textBuffer);
 				mainGame->PopupElement(mainGame->wQuery);
 			}
 		}
@@ -3557,7 +3567,7 @@ int DuelClient::ClientAnalyze(char * msg, unsigned int len) {
 		/*int player = */mainGame->LocalPlayer(BufferIO::ReadInt8(pbuf));
 		mainGame->dField.announce_count = BufferIO::ReadInt8(pbuf);
 		int available = BufferIO::ReadInt32(pbuf);
-		for(int i = 0, filter = 0x1; i < 25; ++i, filter <<= 1) {
+		for(int i = 0, filter = 0x1; i < RACES_COUNT; ++i, filter <<= 1) {
 			mainGame->chkRace[i]->setChecked(false);
 			if(filter & available)
 				mainGame->chkRace[i]->setVisible(true);

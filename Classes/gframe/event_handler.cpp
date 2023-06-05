@@ -211,6 +211,18 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					soundManager.StopBGM();
 				break;
 			}
+            case BUTTON_QUICK_ANIMIATION: {
+                soundManager.PlaySoundEffect(SOUND_BUTTON);
+                if (mainGame->gameConf.quick_animation) {
+                        mainGame->gameConf.quick_animation = false;
+                        mainGame->imgQuickAnimation->setImage(imageManager.tOneX);
+				} else {
+					mainGame->gameConf.quick_animation = true;
+					mainGame->imgQuickAnimation->setImage(imageManager.tDoubleX);
+				}
+				mainGame->chkQuickAnimation->setChecked(mainGame->gameConf.quick_animation);
+				break;
+            }
 			case BUTTON_CHATTING: {
 			    soundManager.PlaySoundEffect(SOUND_BUTTON);
 				if (mainGame->gameConf.chkIgnore1) {
@@ -227,32 +239,6 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->ClearChatMsg();
 			    break;
 			}
-            case BUTTON_REDUCE_CARD_TEXT: {
-                if (mainGame->gameConf.textfontsize < 24) {
-					mainGame->btnEnlargeCardText->setEnabled(true);
-					if (mainGame->gameConf.textfontsize = 16)
-                    	mainGame->btnReduceCardText->setEnabled(false);
-                } else {
-					mainGame->gameConf.textfontsize = mainGame->gameConf.textfontsize - 2;
-					mainGame->textFont->setFontSize(mainGame->gameConf.textfontsize * mainGame->yScale);
-					const auto& tsize = mainGame->stText->getRelativePosition();
-					mainGame->InitStaticText(mainGame->stText, tsize.getWidth(), tsize.getHeight(), mainGame->textFont, mainGame->showingtext);
-				}
-                break;
-            }
-            case BUTTON_ENLARGE_CARD_TEXT: {
-                if(mainGame->gameConf.textfontsize = 24) {
-                    mainGame->btnEnlargeCardText->setEnabled(false);
-					if (mainGame->gameConf.textfontsize > 16)
-                    	mainGame->btnReduceCardText->setEnabled(true);
-                } else {
-					mainGame->gameConf.textfontsize = mainGame->gameConf.textfontsize + 2;
-					mainGame->textFont->setFontSize(mainGame->gameConf.textfontsize * mainGame->yScale);
-					const auto& tsize = mainGame->stText->getRelativePosition();
-					mainGame->InitStaticText(mainGame->stText, tsize.getWidth(), tsize.getHeight(), mainGame->textFont, mainGame->showingtext);
-				}
-                break;
-            }
 			case BUTTON_CHAIN_IGNORE: {
 				soundManager.PlaySoundEffect(SOUND_BUTTON);
 				mainGame->ignore_chain = mainGame->btnChainIgnore->isPressed();
@@ -935,7 +921,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			}
 			case CHECK_RACE: {
 				int rac = 0, filter = 0x1, count = 0;
-				for(int i = 0; i < 25; ++i, filter <<= 1) {
+				for(int i = 0; i < RACES_COUNT; ++i, filter <<= 1) {
 					if(mainGame->chkRace[i]->isChecked()) {
 						rac |= filter;
 						count++;
@@ -2043,6 +2029,13 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 				return true;
 				break;
 			}
+			case CHECKBOX_HIDE_PLAYER_NAME: {
+				mainGame->gameConf.hide_player_name = mainGame->chkHidePlayerName->isChecked() ? 1 : 0;
+				if(mainGame->gameConf.hide_player_name)
+					mainGame->ClearChatMsg();
+				return true;
+				break;
+			}
 			case CHECKBOX_PREFER_EXPANSION: {
 				mainGame->gameConf.prefer_expansion_script = mainGame->chkPreferExpansionScript->isChecked() ? 1 : 0;
 				return true;
@@ -2127,7 +2120,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 					break;
 				}
 				u32 pos = mainGame->scrCardText->getPos();
-				mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth() - 15, mainGame->textFont, mainGame->showingtext, pos);
+				mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth(), mainGame->textFont, mainGame->showingtext, pos);
 				return true;
 				break;
 			}
@@ -2316,7 +2309,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 	                if(pos < 0) pos = 0;
 	                if(pos > max) pos = max;
 	                mainGame->scrCardText->setPos(pos);
-	                mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth() - 15, mainGame->textFont, mainGame->showingtext, pos);
+	                mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth(), mainGame->textFont, mainGame->showingtext, pos);
 	            }
                 if(is_dragging_lstLog) {
                     if(!mainGame->lstLog->getVerticalScrollBar()->isVisible()) {

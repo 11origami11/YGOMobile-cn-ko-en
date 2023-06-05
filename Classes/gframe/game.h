@@ -61,6 +61,7 @@ struct Config {
 	int quick_animation;
 	int auto_save_replay;
 	int draw_single_chain;
+	int hide_player_name;
 	int prefer_expansion_script;
 	//sound
 	bool enable_sound;
@@ -265,7 +266,7 @@ public:
 	irr::gui::CGUITTFont* titleFont;
 	std::map<irr::gui::CGUIImageButton*, int> imageLoading;
 	//card image
-	irr::gui::IGUIImage* wCardImg;
+	irr::gui::IGUIStaticText* wCardImg;
 	irr::gui::IGUIImage* imgCard;
 	//imageButtons pallet
 	irr::gui::IGUIWindow* wPallet;
@@ -278,6 +279,8 @@ public:
 	irr::gui::IGUIButton* btnCloseLog;//
 	//imageButton BGM
 	irr::gui::CGUIImageButton* imgVol;
+    //imageButton Quick Animation
+    irr::gui::CGUIImageButton* imgQuickAnimation;
 	//imageButton Chatting
     irr::gui::CGUIImageButton* imgChat;
 	//Settings
@@ -298,8 +301,6 @@ public:
 	irr::gui::IGUIStaticText* stSetName;
 	irr::gui::IGUIStaticText* stText;
 	irr::gui::IGUIScrollBar* scrCardText;
-    irr::gui::IGUIButton* btnReduceCardText;
-    irr::gui::IGUIButton* btnEnlargeCardText;
 	irr::gui::IGUICheckBox* chkMAutoPos;
 	irr::gui::IGUICheckBox* chkSTAutoPos;
 	irr::gui::IGUICheckBox* chkRandomPos;
@@ -309,6 +310,7 @@ public:
 	irr::gui::IGUICheckBox* chkQuickAnimation;
 	irr::gui::IGUICheckBox* chkAutoSaveReplay;
 	irr::gui::IGUICheckBox* chkDrawSingleChain;
+	irr::gui::IGUICheckBox* chkHidePlayerName;
 	irr::gui::IGUIElement* elmTabSystemLast;
 	irr::gui::IGUIScrollBar* scrTabSystem;
 	irr::gui::IGUICheckBox* chkDrawFieldSpell;
@@ -503,7 +505,7 @@ public:
 	irr::gui::IGUIWindow* wANRace;
 	irr::gui::IGUIImage* bgANRace;
 	irr::gui::IGUIStaticText* stANRace;
-	irr::gui::IGUICheckBox* chkRace[25];
+	irr::gui::IGUICheckBox* chkRace[RACES_COUNT];
 	//cmd menu
 	irr::gui::IGUIWindow* wCmdMenu;
 	irr::gui::IGUIButton* btnActivate;
@@ -681,8 +683,8 @@ private:
 extern Game* mainGame;
 }
 
-#define CARD_IMG_WIDTH		177
-#define CARD_IMG_HEIGHT		254
+#define CARD_IMG_WIDTH		200
+#define CARD_IMG_HEIGHT		290
 #define CARD_THUMB_WIDTH	44
 #define CARD_THUMB_HEIGHT	64
 
@@ -888,12 +890,12 @@ extern Game* mainGame;
 #define CHECKBOX_PREFER_EXPANSION	373
 #define CHECKBOX_DRAW_SINGLE_CHAIN	374
 #define CHECKBOX_LFLIST				375
+#define CHECKBOX_HIDE_PLAYER_NAME	376
+#define BUTTON_QUICK_ANIMIATION	    379
 #define BUTTON_BIG_CARD_CLOSE		380
 #define BUTTON_BIG_CARD_ZOOM_IN		381
 #define BUTTON_BIG_CARD_ZOOM_OUT	382
 #define BUTTON_BIG_CARD_ORIG_SIZE	383
-#define BUTTON_ENLARGE_CARD_TEXT	384
-#define BUTTON_REDUCE_CARD_TEXT	    385
 
 #define AVAIL_OCG					0x1
 #define AVAIL_TCG					0x2

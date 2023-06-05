@@ -9,8 +9,8 @@ android {
         minSdkVersion 21
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
-        versionCode 310090943
-        versionName "3.10.9"
+        versionCode 311000947
+        versionName "3.11.0"
         flavorDimensions "versionCode"
         vectorDrawables.useSupportLibrary = true
         ndk {
@@ -59,11 +59,14 @@ android {
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/LICENSE-notice.md'
         exclude 'META-INF/rxjava.properties'
     }
     androidResources {
         noCompress 'dll', 'config'
     }
+    namespace 'cn.garymb.ygomobile.lite'
     //    buildToolsVersion '28.0.3'
 }
 
