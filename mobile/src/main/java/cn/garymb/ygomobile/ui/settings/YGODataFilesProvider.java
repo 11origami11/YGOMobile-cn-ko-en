@@ -18,11 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import cn.garymb.ygomobile.App;
 import cn.garymb.ygomobile.Constants;
 import cn.garymb.ygomobile.lite.R;
 
-public class YGODataFilesProvider extends DocumentsProvider {    
+public class YGODataFilesProvider extends DocumentsProvider {
     // The default columns to return information about a root if no specific
     // columns are requested in a query.
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[]{
@@ -167,7 +166,7 @@ public class YGODataFilesProvider extends DocumentsProvider {
     @Override
     public void deleteDocument(String documentId) throws FileNotFoundException {
         File file = getFileForDocId(documentId);
-        if (!file.delete()) {
+        if (!deleteFile(file)) {
             throw new FileNotFoundException("Failed to delete document with id " + documentId);
         }
     }
@@ -329,5 +328,21 @@ public class YGODataFilesProvider extends DocumentsProvider {
         row.add(Document.COLUMN_LAST_MODIFIED, file.lastModified());
         row.add(Document.COLUMN_FLAGS, flags);
         row.add(Document.COLUMN_ICON, R.drawable.ic_icon);
+    }
+
+    //递归删除文件
+    private boolean deleteFile(File file) {
+        if (file.isFile()) {
+            if (!file.delete()) return false;
+        } else if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteFile(f);
+                }
+            }
+            if (!file.delete()) return false;
+        }
+        return true;
     }
 }
