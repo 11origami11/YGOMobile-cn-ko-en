@@ -196,11 +196,11 @@ void SoundManager::PlayDialogSound(irr::gui::IGUIElement * element) {
 void SoundManager::PlayMusic(char* song, bool loop) {
 	if(!mainGame->chkEnableMusic->isChecked())
 		return;
-	if(!engineMusic->isCurrentlyPlaying(song)) {
+	//if(!engineMusic->isCurrentlyPlaying(song)) {
 		engineMusic->stopAllSounds();
 		engineMusic->setSoundVolume((double)mainGame->scrMusicVolume->getPos() / 100);
 		soundBGM = engineMusic->playMusic(song, loop);
-	}
+	//}
 }
 void SoundManager::PlayBGM(int scene) {
 	if(!mainGame->chkEnableMusic->isChecked())

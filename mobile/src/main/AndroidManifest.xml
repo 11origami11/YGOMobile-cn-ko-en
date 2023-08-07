@@ -174,13 +174,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- 文档提供程序
-             https://developer.android.google.cn/guide/topics/providers/create-document-provider?hl=zh-cn
-        -->
+        <!-- 用于解决[Android 11+]无法访问数据目录的问题，可配合第三方文件管理器使用 -->
         <provider
             android:name="cn.garymb.ygomobile.ui.settings.YGODataFilesProvider"
             android:authorities="${applicationId}.documents"
             android:exported="true"
+            android:enabled="@bool/FilesProvider"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">
             <intent-filter>
